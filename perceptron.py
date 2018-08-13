@@ -12,7 +12,6 @@ def findLine(point1, point2):
     intercept = point2[1] - slope*point2[0]
     return slope, intercept
 
-
 def classify(data, slope, intercept):
     group = []
     size = np.size(data, 0)
@@ -20,6 +19,13 @@ def classify(data, slope, intercept):
         group.append(sign(data[i,1]-slope*data[i,0]-intercept))
     return group
 
+def findErrorRate(group1, group2):
+    error = 0
+    length = len(group1)
+    for i in range(length):
+        if group1[i] != group2[i]:
+            error += 1
+    return float(error)/length
 
 class Pla:
     def __init__(self, data, group):
@@ -37,7 +43,7 @@ class Pla:
            if(self.classifiedGroup[i] != self.correctGroup[i]):
               self.misclassified.append(i) 
     
-    def pla(self):
+    def learn(self):
         while self.misclassified != []:
             self.repeat += 1
             index = self.misclassified[0]
@@ -45,7 +51,6 @@ class Pla:
             for i in range(self.size):
                 self.classifiedGroup[i] = sign(self.coeff.T.dot(self.data[i, :].reshape(-1, 1)))
                 self.updateMisclassified()
-        return repeat
 
     def getCoeff(self):
         return self.coeff
@@ -61,4 +66,14 @@ if __name__ == "__main__":
     group = classify(data, slope, intercept)
 
     perceptron = Pla(data, group)
-    repeat = perceptron.pla()
+    perceptron.learn()
+    weight = perceptron.getCoeff()
+    learnedSlope = -float(weight[1])/weight[2]
+    learnedInter = -float(weight[0])/weight[2]
+
+    experimentNum = 1000
+    testData = np.random.uniform(-1, 1, 2*experimentNum).reshape(experimentNum, -1)
+    testGroupClass = classify(testData, slope, intercept)
+    learnedClass = classify(testData, learnedSlope, learnedInter) 
+    errorRate = findErrorRate(testGroupClass, learnedClass)
+    print errorRate

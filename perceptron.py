@@ -1,10 +1,11 @@
 import numpy as np
+import sys
 
 def sign(x):
     if np.sign(x)==0:
         return -1
     else:
-        return np.sign(x)
+        return int(np.sign(x))
 
 def findLine(point1, point2):
     slope = (point2[1]-point1[1])/float(point2[0]-point1[0])
@@ -23,26 +24,26 @@ def classify(data, slope, intercept):
 class Pla:
     def __init__(self, data, group):
         self.size = np.size(data, 0) 
-        self.data = np.concatenate(np.ones(1, self.size), data, axis=1) 
+        self.data = np.concatenate((np.ones((self.size,1)), data), axis=1) 
         self.correctGroup = group 
         self.misclassified = list(range(self.size)) 
         self.coeff = np.zeros((np.size(data, 1)+1, 1))
         self.classifiedGroup = [0] * self.size
-         
+
     def updateMisclassified(self):
         self.misclassified = []
         for i in range(self.size):
-           if(self.classifiedGroup[i] != self.label[i]):
+           if(self.classifiedGroup[i] != self.correctGroup[i]):
               self.misclassified.append(i) 
     
     def pla(self):
         repeat = 0
-        while not self.misclassified:
+        while self.misclassified != []:
             repeat += 1
             index = self.misclassified[0]
-            self.coeff = self.coeff + self.correctGroup[index]*self.data[index, :]
+            self.coeff = self.coeff + (self.correctGroup[index]*self.data[index, :]).reshape(-1, 1)
             for i in range(self.size):
-                self.classifiedGroup[i] = sign(self.coeff.dot(self.data[i, :]))
+                self.classifiedGroup[i] = sign(self.coeff.T.dot(self.data[i, :].reshape(-1, 1)))
                 self.updateMisclassified()
         return repeat
 

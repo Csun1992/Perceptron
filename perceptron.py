@@ -48,8 +48,7 @@ class Pla:
             self.classifiedGroup[i] = sign(self.coeff.T.dot(self.data[i, :].reshape(-1, 1)))
 
     def updateCoeff(self):
-        for i in self.misclassified:
-            index = self.misclassified[i]
+        for index in self.misclassified:
             self.coeff = self.coeff + (self.correctGroup[index]*self.data[index, :]).reshape(-1, 1)
     
     def learn(self):
@@ -76,7 +75,7 @@ if __name__ == "__main__":
     sampleSize = 10
     totalRep = 0
     
-    for i in range(1000):
+    for i in range(2):
         data = np.random.uniform(lowerLim, upperLim, sampleSize*dataDim).reshape(sampleSize, dataDim)
         x1 = data[0, :]
         x2 = data[1, :]
@@ -87,7 +86,7 @@ if __name__ == "__main__":
         perceptron.learn()
         totalRep += perceptron.getRepetition()
     print "For sample size = 10, the average repetiion is:"
-    print totalRep/float(experimentNum)
+    print totalRep*2#/float(experimentNum)
     weight = perceptron.getCoeff()
     learnedSlope = -float(weight[1])/weight[2]
     learnedInter = -float(weight[0])/weight[2]

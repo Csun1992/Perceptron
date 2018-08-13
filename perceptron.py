@@ -42,16 +42,22 @@ class Pla:
         for i in range(self.size):
            if(self.classifiedGroup[i] != self.correctGroup[i]):
               self.misclassified.append(i) 
+
+    def recalculateClassified(self):
+        for i in range(self.size):
+            self.classifiedGroup[i] = sign(self.coeff.T.dot(self.data[i, :].reshape(-1, 1)))
+
+    def updateCoeff(self):
+        for i in self.misclassified:
+            index = self.misclassified[i]
+            self.coeff = self.coeff + (self.correctGroup[index]*self.data[index, :]).reshape(-1, 1)
     
     def learn(self):
         while self.misclassified != []:
             self.repeat += 1
-            randIndex = np.random.randint(len(self.misclassified))
-            index = self.misclassified[randIndex]
-            self.coeff = self.coeff + (self.correctGroup[index]*self.data[index, :]).reshape(-1, 1)
-            for i in range(self.size):
-                self.classifiedGroup[i] = sign(self.coeff.T.dot(self.data[i, :].reshape(-1, 1)))
-                self.updateMisclassified()
+            self.updateCoeff()
+            self.recalculateClassified()
+            self.updateMisclassified()
 
     def getCoeff(self):
         return self.coeff

@@ -46,7 +46,8 @@ class Pla:
     def learn(self):
         while self.misclassified != []:
             self.repeat += 1
-            index = self.misclassified[0]
+            randIndex = np.random.randint(len(self.misclassified))
+            index = self.misclassified[randIndex]
             self.coeff = self.coeff + (self.correctGroup[index]*self.data[index, :]).reshape(-1, 1)
             for i in range(self.size):
                 self.classifiedGroup[i] = sign(self.coeff.T.dot(self.data[i, :].reshape(-1, 1)))
@@ -59,21 +60,64 @@ class Pla:
         return self.repeat
 
 if __name__ == "__main__":
-    data = np.random.uniform(-1, 1, 20).reshape(10, 2)
-    x1 = data[0, :]
-    x2 = data[1, :]
-    slope, intercept = findLine(x1, x2)
-    group = classify(data, slope, intercept)
+    experimentNum = 1000
+    dataDim = 2
+    lowerLim = -1
+    upperLim = 1
 
-    perceptron = Pla(data, group)
-    perceptron.learn()
+
+    # experiment with sample size = 10
+    sampleSize = 10
+    totalRep = 0
+    
+    for i in range(1000):
+        data = np.random.uniform(lowerLim, upperLim, sampleSize*dataDim).reshape(sampleSize, dataDim)
+        x1 = data[0, :]
+        x2 = data[1, :]
+        slope, intercept = findLine(x1, x2)
+        group = classify(data, slope, intercept)
+
+        perceptron = Pla(data, group)
+        perceptron.learn()
+        totalRep += perceptron.getRepetition()
+    print "For sample size = 10, the average repetiion is:"
+    print totalRep/float(experimentNum)
     weight = perceptron.getCoeff()
     learnedSlope = -float(weight[1])/weight[2]
     learnedInter = -float(weight[0])/weight[2]
 
-    experimentNum = 1000
-    testData = np.random.uniform(-1, 1, 2*experimentNum).reshape(experimentNum, -1)
+    testData = np.random.uniform(lowerLim, upperLim, dataDim*experimentNum).reshape(experimentNum, -1)
     testGroupClass = classify(testData, slope, intercept)
     learnedClass = classify(testData, learnedSlope, learnedInter) 
     errorRate = findErrorRate(testGroupClass, learnedClass)
+    print "And the error rate is:"
     print errorRate
+
+    sys.exit()
+    # experiment with sample size = 100
+    totalRep = 0
+    sampleSize = 100
+
+    for i in range(experimentNum):
+        data = np.random.uniform(lowerLim, upperLim, sampleSize*dataDim).reshape(sampleSize, dataDim)
+        x1 = data[0, :]
+        x2 = data[1, :]
+        slope, intercept = findLine(x1, x2)
+        group = classify(data, slope, intercept)
+
+        perceptron = Pla(data, group)
+        perceptron.learn()
+        totalRep += perceptron.getRepetition()
+    print "For sample size = 100, the average repetition is:"
+    print totalRep/float(experimentNum)
+    weight = perceptron.getCoeff()
+    learnedSlope = -float(weight[1])/weight[2]
+    learnedInter = -float(weight[0])/weight[2]
+
+    testData = np.random.uniform(lowerLim, upperLim, dataDim*experimentNum).reshape(experimentNum, -1)
+    testGroupClass = classify(testData, slope, intercept)
+    learnedClass = classify(testData, learnedSlope, learnedInter) 
+    errorRate = findErrorRate(testGroupClass, learnedClass)
+    print "And the error rate is:"
+    print errorRate
+
